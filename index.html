@@ -20,6 +20,153 @@ nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid
 nav button{flex:1;background:white;color:#456;border-radius:0;padding:13px 4px;font-size:13px}.active{color:var(--blue);font-weight:800}
 .hidden{display:none}.section-title{font-size:18px;font-weight:800;color:#173f62;margin:2px 0 10px}.muted{color:#6b7280;font-size:13px}.money{color:#174a2e}.warn{color:#8a4b08}
 @media(max-width:520px){.grid{grid-template-columns:1fr 1fr}th:nth-child(4),td:nth-child(4){display:none}}
+
+/* ===== iPhone / Desktop scroll fix V2 ===== */
+html, body{
+  width:100%;
+  height:100%;
+  margin:0;
+  overflow:hidden !important;
+}
+body{
+  position:fixed;
+  inset:0;
+}
+header{
+  position:fixed !important;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000;
+}
+main{
+  position:fixed !important;
+  top:55px;
+  left:0;
+  right:0;
+  bottom:calc(58px + env(safe-area-inset-bottom));
+  max-width:none !important;
+  margin:0 !important;
+  padding:12px !important;
+  overflow-x:hidden !important;
+  overflow-y:scroll !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior-y:contain;
+  touch-action:pan-y !important;
+}
+main > section{
+  width:min(760px, 100%);
+  margin-left:auto;
+  margin-right:auto;
+  overflow:visible !important;
+}
+.card{
+  overflow:visible !important;
+}
+nav{
+  position:fixed !important;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:1001;
+}
+table{
+  position:relative;
+}
+th{
+  position:static !important;
+}
+@media (min-width:521px){
+  main{top:55px;}
+}
+
+
+/* 月份紀錄月份選擇 */
+#records label{
+  display:block;
+  margin:12px 0 6px;
+  font-weight:700;
+  color:#334155;
+}
+#recordMonthPick{
+  width:100%;
+  box-sizing:border-box;
+  font-size:18px;
+  padding:12px 14px;
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  background:#fff;
+}
+#annual th, #records th{
+  position:static !important;
+  top:auto !important;
+}
+
+
+/* ===== 畫面完整修正版：使用原生頁面捲動，不再用 fixed main ===== */
+html{
+  height:auto !important;
+  min-height:100% !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+}
+body{
+  position:static !important;
+  inset:auto !important;
+  width:100% !important;
+  height:auto !important;
+  min-height:100vh !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  touch-action:auto !important;
+}
+header{
+  position:static !important;
+  top:auto !important;
+  left:auto !important;
+  right:auto !important;
+}
+main{
+  position:static !important;
+  top:auto !important;
+  left:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  height:auto !important;
+  min-height:0 !important;
+  max-width:760px !important;
+  margin:0 auto !important;
+  padding:12px 12px 100px !important;
+  overflow:visible !important;
+  touch-action:auto !important;
+}
+main > section,
+section,
+.card{
+  height:auto !important;
+  min-height:0 !important;
+  overflow:visible !important;
+}
+th,
+#annual th,
+#records th{
+  position:static !important;
+  top:auto !important;
+  z-index:auto !important;
+}
+nav{
+  position:fixed !important;
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  z-index:1000 !important;
+}
+#annual table,
+#records table{
+  margin-top:0 !important;
+}
+
 </style>
 </head>
 <body>
@@ -63,7 +210,9 @@ nav button{flex:1;background:white;color:#456;border-radius:0;padding:13px 4px;f
 <section id="records" class="hidden">
   <div class="card">
     <div class="section-title">月份紀錄</div>
-    <div style="overflow:auto"><table><thead><tr><th>日期</th><th>星期</th><th>假別</th><th>時數</th><th>扣薪</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
+    <label for="recordMonthPick">觀看月份</label>
+    <input id="recordMonthPick" type="month">
+    <div style="overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;margin-top:14px"><table><thead><tr><th>日期</th><th>星期</th><th>假別</th><th>時數</th><th>扣薪</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
   </div>
 </section>
 
@@ -71,12 +220,22 @@ nav button{flex:1;background:white;color:#456;border-radius:0;padding:13px 4px;f
   <div class="card">
     <div class="section-title">年度請假統計</div>
     <label>統計年度</label><input id="yearPick" type="number" min="2020" max="2100">
-    <div style="overflow:auto;margin-top:12px"><table><thead><tr><th>假別</th><th>次數</th><th>時數</th><th>應給</th><th>扣薪</th><th>8小時日數</th></tr></thead><tbody id="annualBody"></tbody></table></div>
+    <div style="overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;margin-top:12px"><table><thead><tr><th>假別</th><th>次數</th><th>時數</th><th>應給</th><th>扣薪</th><th>8小時日數</th></tr></thead><tbody id="annualBody"></tbody></table></div>
   </div>
 </section>
 
 <section id="settings" class="hidden">
   <div class="card">
+    <div class="section-title">台灣國定假日</div>
+    <div class="kpi" style="margin-bottom:12px">
+      <b>假日資料狀態</b>
+      <span id="holidayStatus" style="font-size:15px">尚未更新</span>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="updateTaiwanHolidays(true)">立即更新國定假日</button>
+    </div>
+    <p class="muted">APP 啟動時會自動向政府開放資料來源檢查更新；離線時會沿用手機中最後一次成功更新的資料。</p>
+    <hr style="border:0;border-top:1px solid #e6eaf0;margin:16px 0">
     <div class="section-title">薪資設定</div>
     <div class="grid">
       <div><label>目前時薪</label><input id="hourly" type="number"></div>
@@ -120,11 +279,80 @@ function persist(){localStorage.setItem("twLeaveApp",JSON.stringify(data))}
 function todayMonth(){let d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
 function weekday(s){let d=new Date(s+"T12:00:00"),a=["週日","週一","週二","週三","週四","週五","週六"];return a[d.getDay()]}
 function showTab(id,btn){document.querySelectorAll("main section").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");refresh()}
+
+const HOLIDAY_API="https://data.ntpc.gov.tw/api/datasets/308dcd75-6434-45bc-a95f-584da4fed251/csv/file";
+
+function parseCSVLine(line){
+  const out=[]; let cur="", q=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){
+      if(q && line[i+1]==='"'){cur+='"';i++} else q=!q;
+    }else if(ch===',' && !q){out.push(cur);cur=""}
+    else cur+=ch;
+  }
+  out.push(cur); return out;
+}
+function normalizeDate(v){
+  v=String(v||"").trim().replace(/\//g,"-");
+  if(/^\d{8}$/.test(v)) return v.slice(0,4)+"-"+v.slice(4,6)+"-"+v.slice(6,8);
+  let m=v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  return m ? `${m[1]}-${String(+m[2]).padStart(2,"0")}-${String(+m[3]).padStart(2,"0")}` : "";
+}
+async function updateTaiwanHolidays(manual=false){
+  const status=$("holidayStatus");
+  if(status) status.textContent="正在檢查政府資料…";
+  try{
+    const res=await fetch(HOLIDAY_API,{cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const text=await res.text();
+    const lines=text.replace(/^\uFEFF/,"").split(/\r?\n/).filter(x=>x.trim());
+    if(lines.length<2) throw new Error("資料內容為空");
+    const head=parseCSVLine(lines[0]).map(x=>x.trim().toLowerCase());
+    const find=(names)=>head.findIndex(h=>names.some(n=>h===n || h.includes(n)));
+    const iDate=find(["date","日期"]);
+    const iHoliday=find(["isholiday","是否放假"]);
+    const iYear=find(["year","西元年"]);
+    if(iDate<0 || iHoliday<0) throw new Error("找不到日期/放假欄位");
+
+    const holidays=[], years=new Set();
+    for(let i=1;i<lines.length;i++){
+      const row=parseCSVLine(lines[i]), d=normalizeDate(row[iDate]);
+      if(!d) continue;
+      const y=+(iYear>=0 ? row[iYear] : d.slice(0,4));
+      if(y) years.add(y);
+      const flag=String(row[iHoliday]??"").trim().toLowerCase();
+      // 新北市開放資料可能為 true/false、1/0；中央辦公日曆慣例也可能以 2 表示放假
+      const isHoliday=["true","1","2","yes","y","是"].includes(flag);
+      if(isHoliday) holidays.push(d);
+    }
+    if(!holidays.length) throw new Error("沒有讀到放假資料");
+
+    // 只替換官方資料涵蓋年份，保留其他年度既有資料
+    const officialYears=[...years];
+    data.holidays=(data.holidays||[]).filter(d=>!officialYears.includes(+String(d).slice(0,4)));
+    data.holidays=[...new Set([...data.holidays,...holidays])].sort();
+    data.holidaySync={updatedAt:new Date().toISOString(),years:officialYears,source:"政府資料開放平臺／新北市政府人事處"};
+    persist(); refresh();
+    if(status) status.textContent=`已更新：${officialYears.sort().join("、")} 年（${holidays.length} 個放假日）`;
+    if(manual) alert("台灣年度國定假日已更新完成");
+  }catch(err){
+    const last=data.holidaySync?.updatedAt ? new Date(data.holidaySync.updatedAt).toLocaleString("zh-TW") : "尚無";
+    if(status) status.textContent=`更新失敗，沿用本機資料｜上次成功：${last}`;
+    if(manual) alert("目前無法連線更新國定假日。\nAPP 會繼續使用上次成功下載的資料。\n\n"+err.message);
+  }
+}
+function showHolidaySyncStatus(){
+  const s=data.holidaySync, el=$("holidayStatus");
+  if(!el) return;
+  el.textContent=s ? `上次更新：${new Date(s.updatedAt).toLocaleString("zh-TW")}｜年度：${(s.years||[]).sort().join("、")}` : "尚未從政府資料更新";
+}
+
 function init(){
- $("monthPick").value=todayMonth(); $("yearPick").value=new Date().getFullYear();
+ $("monthPick").value=todayMonth(); $("recordMonthPick").value=todayMonth(); $("yearPick").value=new Date().getFullYear();
  $("leaveDate").value=new Date().toISOString().slice(0,10);
  $("leaveType").innerHTML=data.types.map(x=>`<option>${x[0]}</option>`).join("");
- loadSettings(); refresh();
+ loadSettings(); refresh(); showHolidaySyncStatus(); setTimeout(()=>updateTaiwanHolidays(false),300);
 }
 function workdays(month){
  let [y,m]=month.split("-").map(Number), last=new Date(y,m,0).getDate(), n=0,h=0;
@@ -132,15 +360,13 @@ function workdays(month){
  return [n,h]
 }
 function monthLeaves(){let m=$("monthPick").value;return data.leaves.filter(x=>x.date.startsWith(m))}
-function calc(l){let rate=(data.types.find(x=>x[0]===l.type)||["",0])[1],h=+l.hours||0,hr=+data.settings.hourly||0;return {rate,paid:h*hr*rate,deduct:h*hr*(1-rate)}}
-function refresh(){
- let m=$("monthPick").value||todayMonth(), [wd,hd]=workdays(m), ls=monthLeaves(), hours=0,paid=0,ded=0;
- ls.forEach(l=>{let c=calc(l);hours+=+l.hours||0;paid+=c.paid;ded+=c.deduct});
- let gross=wd*(+data.settings.dailyHours||8)*(+data.settings.hourly||0);
- let net=gross-ded-(+data.settings.labor||0)-(+data.settings.health||0)-(+data.settings.welfare||0)-(+data.settings.otherDeduct||0);
- $("workDays").textContent=wd;$("holidayDays").textContent=hd;$("gross").textContent=money(gross);$("net").textContent=money(net);
- $("leaveCount").textContent=ls.length;$("leaveHours").textContent=hours.toFixed(2);$("paidLeave").textContent=money(paid);$("deduct").textContent=money(ded);
- $("recordBody").innerHTML=ls.sort((a,b)=>a.date.localeCompare(b.date)).map(l=>{let c=calc(l);return `<tr><td>${l.date}</td><td>${weekday(l.date)}</td><td><span class="pill">${l.type}</span></td><td class="num">${(+l.hours).toFixed(2)}</td><td class="num">${money(c.deduct)}</td><td><button class="danger" onclick="delLeave('${l.id}')">刪除</button></td></tr>`}).join("")||'<tr><td colspan="6" class="muted">本月尚無請假紀錄</td></tr>';
+
+function renderRecords(){
+  let picker=$("recordMonthPick");
+  let m=(picker&&picker.value)||$("monthPick").value||todayMonth();
+  if(picker && !picker.value) picker.value=m;
+  let ls=data.leaves.filter(x=>x.date.startsWith(m));
+ renderRecords();
  renderAnnual();
 }
 function saveLeave(){
@@ -156,7 +382,9 @@ function renderAnnual(){
  let y=+$("yearPick").value||new Date().getFullYear(), rows=data.types.map(t=>{let ls=data.leaves.filter(x=>x.date.startsWith(y+"-")&&x.type===t[0]),h=0,p=0,d=0;ls.forEach(x=>{let c=calc(x);h+=+x.hours;p+=c.paid;d+=c.deduct});return `<tr><td>${t[0]}</td><td class="num">${ls.length}</td><td class="num">${h.toFixed(2)}</td><td class="num">${money(p)}</td><td class="num">${money(d)}</td><td class="num">${(h/(+data.settings.dailyHours||8)).toFixed(2)}</td></tr>`});
  $("annualBody").innerHTML=rows.join("")
 }
-$("monthPick").addEventListener("change",refresh);$("yearPick").addEventListener("input",renderAnnual);
+$("monthPick").addEventListener("change",refresh);
+$("recordMonthPick").addEventListener("change",renderRecords);
+$("yearPick").addEventListener("input",renderAnnual);
 function download(name,text,type){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
 function exportCSV(){let rows=[["日期","星期","假別","請假時數","時薪","給薪比例","應給薪資","扣薪金額","證明/單號","備註"]];data.leaves.forEach(l=>{let c=calc(l);rows.push([l.date,weekday(l.date),l.type,l.hours,data.settings.hourly,c.rate,c.paid,c.deduct,l.proof||"",l.note||""])});download("請假紀錄.csv","\ufeff"+rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n"),"text/csv;charset=utf-8")}
 function backupJSON(){download("時薪制請假APP備份.json",JSON.stringify(data,null,2),"application/json")}
