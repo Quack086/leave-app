@@ -20,6 +20,45 @@ nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid
 nav button{flex:1;background:white;color:#456;border-radius:0;padding:13px 4px;font-size:13px}.active{color:var(--blue);font-weight:800}
 .hidden{display:none}.section-title{font-size:18px;font-weight:800;color:#173f62;margin:2px 0 10px}.muted{color:#6b7280;font-size:13px}.money{color:#174a2e}.warn{color:#8a4b08}
 @media(max-width:520px){.grid{grid-template-columns:1fr 1fr}th:nth-child(4),td:nth-child(4){display:none}}
+
+html{
+  height:auto !important;
+  min-height:100% !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch;
+}
+body{
+  height:auto !important;
+  min-height:100vh !important;
+  min-height:100dvh !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  position:static !important;
+  touch-action:pan-y !important;
+  overscroll-behavior-y:auto;
+}
+main{
+  height:auto !important;
+  min-height:calc(100vh - 55px) !important;
+  min-height:calc(100dvh - 55px) !important;
+  overflow:visible !important;
+  padding-bottom:calc(110px + env(safe-area-inset-bottom)) !important;
+}
+section{
+  height:auto !important;
+  min-height:0 !important;
+  overflow:visible !important;
+}
+.card{
+  overflow:visible !important;
+}
+nav{
+  position:fixed !important;
+  left:0; right:0; bottom:0;
+  z-index:999;
+}
+
 </style>
 </head>
 <body>
@@ -63,7 +102,7 @@ nav button{flex:1;background:white;color:#456;border-radius:0;padding:13px 4px;f
 <section id="records" class="hidden">
   <div class="card">
     <div class="section-title">月份紀錄</div>
-    <div style="overflow:auto"><table><thead><tr><th>日期</th><th>星期</th><th>假別</th><th>時數</th><th>扣薪</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
+    <div style="overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch"><table><thead><tr><th>日期</th><th>星期</th><th>假別</th><th>時數</th><th>扣薪</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
   </div>
 </section>
 
@@ -71,7 +110,7 @@ nav button{flex:1;background:white;color:#456;border-radius:0;padding:13px 4px;f
   <div class="card">
     <div class="section-title">年度請假統計</div>
     <label>統計年度</label><input id="yearPick" type="number" min="2020" max="2100">
-    <div style="overflow:auto;margin-top:12px"><table><thead><tr><th>假別</th><th>次數</th><th>時數</th><th>應給</th><th>扣薪</th><th>8小時日數</th></tr></thead><tbody id="annualBody"></tbody></table></div>
+    <div style="overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;margin-top:12px"><table><thead><tr><th>假別</th><th>次數</th><th>時數</th><th>應給</th><th>扣薪</th><th>8小時日數</th></tr></thead><tbody id="annualBody"></tbody></table></div>
   </div>
 </section>
 
