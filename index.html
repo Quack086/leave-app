@@ -21,33 +21,43 @@ nav button{flex:1;background:white;color:#456;border-radius:0;padding:13px 4px;f
 .hidden{display:none}.section-title{font-size:18px;font-weight:800;color:#173f62;margin:2px 0 10px}.muted{color:#6b7280;font-size:13px}.money{color:#174a2e}.warn{color:#8a4b08}
 @media(max-width:520px){.grid{grid-template-columns:1fr 1fr}th:nth-child(4),td:nth-child(4){display:none}}
 
-html{
-  height:auto !important;
-  min-height:100% !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch;
+/* ===== iPhone / Desktop scroll fix V2 ===== */
+html, body{
+  width:100%;
+  height:100%;
+  margin:0;
+  overflow:hidden !important;
 }
 body{
-  height:auto !important;
-  min-height:100vh !important;
-  min-height:100dvh !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  position:static !important;
-  touch-action:pan-y !important;
-  overscroll-behavior-y:auto;
+  position:fixed;
+  inset:0;
+}
+header{
+  position:fixed !important;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000;
 }
 main{
-  height:auto !important;
-  min-height:calc(100vh - 55px) !important;
-  min-height:calc(100dvh - 55px) !important;
-  overflow:visible !important;
-  padding-bottom:calc(110px + env(safe-area-inset-bottom)) !important;
+  position:fixed !important;
+  top:55px;
+  left:0;
+  right:0;
+  bottom:calc(58px + env(safe-area-inset-bottom));
+  max-width:none !important;
+  margin:0 !important;
+  padding:12px !important;
+  overflow-x:hidden !important;
+  overflow-y:scroll !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior-y:contain;
+  touch-action:pan-y !important;
 }
-section{
-  height:auto !important;
-  min-height:0 !important;
+main > section{
+  width:min(760px, 100%);
+  margin-left:auto;
+  margin-right:auto;
   overflow:visible !important;
 }
 .card{
@@ -55,8 +65,19 @@ section{
 }
 nav{
   position:fixed !important;
-  left:0; right:0; bottom:0;
-  z-index:999;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:1001;
+}
+table{
+  position:relative;
+}
+th{
+  position:static !important;
+}
+@media (min-width:521px){
+  main{top:55px;}
 }
 
 </style>
