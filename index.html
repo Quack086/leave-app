@@ -80,6 +80,28 @@ th{
   main{top:55px;}
 }
 
+
+/* 月份紀錄月份選擇 */
+#records label{
+  display:block;
+  margin:12px 0 6px;
+  font-weight:700;
+  color:#334155;
+}
+#recordMonthPick{
+  width:100%;
+  box-sizing:border-box;
+  font-size:18px;
+  padding:12px 14px;
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  background:#fff;
+}
+#annual th, #records th{
+  position:static !important;
+  top:auto !important;
+}
+
 </style>
 </head>
 <body>
@@ -123,7 +145,9 @@ th{
 <section id="records" class="hidden">
   <div class="card">
     <div class="section-title">月份紀錄</div>
-    <div style="overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch"><table><thead><tr><th>日期</th><th>星期</th><th>假別</th><th>時數</th><th>扣薪</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
+    <label for="recordMonthPick">觀看月份</label>
+    <input id="recordMonthPick" type="month">
+    <div style="overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;margin-top:14px"><table><thead><tr><th>日期</th><th>星期</th><th>假別</th><th>時數</th><th>扣薪</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
   </div>
 </section>
 
@@ -260,7 +284,7 @@ function showHolidaySyncStatus(){
 }
 
 function init(){
- $("monthPick").value=todayMonth(); $("yearPick").value=new Date().getFullYear();
+ $("monthPick").value=todayMonth(); $("recordMonthPick").value=todayMonth(); $("yearPick").value=new Date().getFullYear();
  $("leaveDate").value=new Date().toISOString().slice(0,10);
  $("leaveType").innerHTML=data.types.map(x=>`<option>${x[0]}</option>`).join("");
  loadSettings(); refresh(); showHolidaySyncStatus(); setTimeout(()=>updateTaiwanHolidays(false),300);
@@ -271,15 +295,13 @@ function workdays(month){
  return [n,h]
 }
 function monthLeaves(){let m=$("monthPick").value;return data.leaves.filter(x=>x.date.startsWith(m))}
-function calc(l){let rate=(data.types.find(x=>x[0]===l.type)||["",0])[1],h=+l.hours||0,hr=+data.settings.hourly||0;return {rate,paid:h*hr*rate,deduct:h*hr*(1-rate)}}
-function refresh(){
- let m=$("monthPick").value||todayMonth(), [wd,hd]=workdays(m), ls=monthLeaves(), hours=0,paid=0,ded=0;
- ls.forEach(l=>{let c=calc(l);hours+=+l.hours||0;paid+=c.paid;ded+=c.deduct});
- let gross=wd*(+data.settings.dailyHours||8)*(+data.settings.hourly||0);
- let net=gross-ded-(+data.settings.labor||0)-(+data.settings.health||0)-(+data.settings.welfare||0)-(+data.settings.otherDeduct||0);
- $("workDays").textContent=wd;$("holidayDays").textContent=hd;$("gross").textContent=money(gross);$("net").textContent=money(net);
- $("leaveCount").textContent=ls.length;$("leaveHours").textContent=hours.toFixed(2);$("paidLeave").textContent=money(paid);$("deduct").textContent=money(ded);
- $("recordBody").innerHTML=ls.sort((a,b)=>a.date.localeCompare(b.date)).map(l=>{let c=calc(l);return `<tr><td>${l.date}</td><td>${weekday(l.date)}</td><td><span class="pill">${l.type}</span></td><td class="num">${(+l.hours).toFixed(2)}</td><td class="num">${money(c.deduct)}</td><td><button class="danger" onclick="delLeave('${l.id}')">刪除</button></td></tr>`}).join("")||'<tr><td colspan="6" class="muted">本月尚無請假紀錄</td></tr>';
+
+function renderRecords(){
+  let picker=$("recordMonthPick");
+  let m=(picker&&picker.value)||$("monthPick").value||todayMonth();
+  if(picker && !picker.value) picker.value=m;
+  let ls=data.leaves.filter(x=>x.date.startsWith(m));
+ renderRecords();
  renderAnnual();
 }
 function saveLeave(){
@@ -295,7 +317,9 @@ function renderAnnual(){
  let y=+$("yearPick").value||new Date().getFullYear(), rows=data.types.map(t=>{let ls=data.leaves.filter(x=>x.date.startsWith(y+"-")&&x.type===t[0]),h=0,p=0,d=0;ls.forEach(x=>{let c=calc(x);h+=+x.hours;p+=c.paid;d+=c.deduct});return `<tr><td>${t[0]}</td><td class="num">${ls.length}</td><td class="num">${h.toFixed(2)}</td><td class="num">${money(p)}</td><td class="num">${money(d)}</td><td class="num">${(h/(+data.settings.dailyHours||8)).toFixed(2)}</td></tr>`});
  $("annualBody").innerHTML=rows.join("")
 }
-$("monthPick").addEventListener("change",refresh);$("yearPick").addEventListener("input",renderAnnual);
+$("monthPick").addEventListener("change",refresh);
+$("recordMonthPick").addEventListener("change",renderRecords);
+$("yearPick").addEventListener("input",renderAnnual);
 function download(name,text,type){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
 function exportCSV(){let rows=[["日期","星期","假別","請假時數","時薪","給薪比例","應給薪資","扣薪金額","證明/單號","備註"]];data.leaves.forEach(l=>{let c=calc(l);rows.push([l.date,weekday(l.date),l.type,l.hours,data.settings.hourly,c.rate,c.paid,c.deduct,l.proof||"",l.note||""])});download("請假紀錄.csv","\ufeff"+rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n"),"text/csv;charset=utf-8")}
 function backupJSON(){download("時薪制請假APP備份.json",JSON.stringify(data,null,2),"application/json")}

@@ -1,4 +1,4 @@
-const CACHE='leave-app-v4-scroll-v2';
+const CACHE='leave-app-v6-record-month-picker';
 const ASSETS=['./manifest.webmanifest'];
 
 self.addEventListener('install', event=>{
