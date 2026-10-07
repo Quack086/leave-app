@@ -1,4 +1,4 @@
-const CACHE='leave-app-v8-layout-complete-fix';
+const CACHE='leave-app-v9-leave-types-fix';
 const LOCAL_ASSETS=['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install', event => {

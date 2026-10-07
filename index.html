@@ -274,11 +274,41 @@ let data=JSON.parse(localStorage.getItem("twLeaveApp")||"null")||{
  settings:{hourly:196,dailyHours:8,labor:758,health:470,welfare:141,otherDeduct:3},
  types:DEFAULT_TYPES, holidays:HOLIDAYS_2026, leaves:[]
 };
+
+/* 舊版本資料自動升級：避免更新 APP 後假別清單遺失 */
+if(!data.settings) data.settings={hourly:196,dailyHours:8,labor:758,health:470,welfare:141,otherDeduct:3};
+if(!Array.isArray(data.leaves)) data.leaves=[];
+if(!Array.isArray(data.holidays)) data.holidays=[...HOLIDAYS_2026];
+if(!Array.isArray(data.types) || data.types.length===0){
+  data.types=DEFAULT_TYPES.map(x=>[x[0],x[1]]);
+}else{
+  /* 補回新版標準假別，但保留使用者既有資料與自訂給薪比例 */
+  const existing=new Map(data.types.filter(x=>Array.isArray(x)&&x[0]).map(x=>[x[0],x]));
+  data.types=DEFAULT_TYPES.map(x=>existing.get(x[0])||[x[0],x[1]]);
+  for(const x of existing.values()){
+    if(!data.types.some(t=>t[0]===x[0])) data.types.push(x);
+  }
+}
+localStorage.setItem("twLeaveApp",JSON.stringify(data));
 const $=id=>document.getElementById(id), money=n=>"$"+Math.round(n||0).toLocaleString("zh-TW");
 function persist(){localStorage.setItem("twLeaveApp",JSON.stringify(data))}
 function todayMonth(){let d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
 function weekday(s){let d=new Date(s+"T12:00:00"),a=["週日","週一","週二","週三","週四","週五","週六"];return a[d.getDay()]}
-function showTab(id,btn){document.querySelectorAll("main section").forEach(x=>x.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");refresh()}
+function fillLeaveTypes(){
+ const sel=$("leaveType");
+ if(!sel) return;
+ const current=sel.value;
+ sel.innerHTML=(data.types||DEFAULT_TYPES).map(x=>`<option value="${x[0]}">${x[0]}</option>`).join("");
+ if(current && [...sel.options].some(o=>o.value===current)) sel.value=current;
+}
+function showTab(id,btn){
+ document.querySelectorAll("main section").forEach(x=>x.classList.add("hidden"));
+ $(id).classList.remove("hidden");
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+ btn.classList.add("active");
+ if(id==="add") fillLeaveTypes();
+ refresh();
+}
 
 const HOLIDAY_API="https://data.ntpc.gov.tw/api/datasets/308dcd75-6434-45bc-a95f-584da4fed251/csv/file";
 
@@ -351,7 +381,7 @@ function showHolidaySyncStatus(){
 function init(){
  $("monthPick").value=todayMonth(); $("recordMonthPick").value=todayMonth(); $("yearPick").value=new Date().getFullYear();
  $("leaveDate").value=new Date().toISOString().slice(0,10);
- $("leaveType").innerHTML=data.types.map(x=>`<option>${x[0]}</option>`).join("");
+ fillLeaveTypes();
  loadSettings(); refresh(); showHolidaySyncStatus(); setTimeout(()=>updateTaiwanHolidays(false),300);
 }
 function workdays(month){
