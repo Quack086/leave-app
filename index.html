@@ -64,18 +64,35 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
  .records-tablewrap{overflow-x:hidden}
  .records-table{width:100%;min-width:0;font-size:12px;table-layout:fixed}
  .records-table th,.records-table td{padding:9px 3px;overflow-wrap:anywhere}
- .records-table th:nth-child(1){width:16%}
  .records-table th:nth-child(2),.records-table td:nth-child(2){display:none}
- .records-table th:nth-child(3){width:31%}
- .records-table th:nth-child(4){width:13%}
- .records-table th:nth-child(5){width:24%}
- .records-table th:nth-child(6){width:16%}
+ .records-table col.record-col-weekday{display:none}
+ .records-table th:nth-child(1),.records-table td:nth-child(1){text-align:left}
+ .records-table th:nth-child(3),.records-table td:nth-child(3){text-align:left}
+ .records-table th:nth-child(4),.records-table td:nth-child(4){text-align:right}
+ .records-table th:nth-child(5),.records-table td:nth-child(5){text-align:right}
+ .records-table th:nth-child(6),.records-table td:nth-child(6){text-align:center}
  .records-table .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
  .records-table .pill{padding:3px 4px;font-size:11px}
  .records-table .danger{padding:6px 3px;font-size:11px}
+ .records-table th{font-size:11px;white-space:normal;line-height:1.35}
+ .records-table td{font-size:12px}
  .date-long{display:none}.date-short{display:inline;white-space:nowrap}
 }
 
+/* 表頭與內容共用 colgroup 欄寬，避免 Safari 自動分配不一致 */
+.records-table col.record-col-date{width:16%}
+.records-table col.record-col-weekday{width:12%}
+.records-table col.record-col-type{width:27%}
+.records-table col.record-col-hours{width:13%}
+.records-table col.record-col-amount{width:20%}
+.records-table col.record-col-action{width:12%}
+@media(max-width:520px){
+ .records-table col.record-col-date{width:16%}
+ .records-table col.record-col-type{width:31%}
+ .records-table col.record-col-hours{width:13%}
+ .records-table col.record-col-amount{width:24%}
+ .records-table col.record-col-action{width:16%}
+}
 /* 年度請假統計 C 款：假別獨立一行、數字三欄，避免手機橫向擠壓 */
 .annual-c-list{display:flex;flex-direction:column;gap:0;margin-top:12px}
 .annual-c-item{padding:14px 3px 15px;border-bottom:1px solid #e5eaf0}
@@ -89,6 +106,7 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
 .annual-c-hours{color:#2262a1}.annual-c-deduct{color:#b42318}.annual-c-days{color:#16824a}
 .annual-c-zero{color:#687586}
 @media(max-width:360px){.annual-c-metrics{gap:5px}.annual-c-metric{padding:9px 5px}.annual-c-value{font-size:15px}}
+.annual-ot-c-list .annual-c-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
 </style>
 </head>
 <body>
@@ -142,14 +160,14 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
 <section id="records" class="hidden"><div class="card">
  <div class="page-heading"><div class="section-title">月份紀錄</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
  <label>觀看月份</label><input id="recordMonthPick" type="month">
- <div class="tablewrap records-tablewrap"><table class="records-table"><thead><tr><th>日期</th><th>星期</th><th>假別／加班類別</th><th>時數</th><th>扣薪／加班費</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
+ <div class="tablewrap records-tablewrap"><table class="records-table"><colgroup><col class="record-col-date"><col class="record-col-weekday"><col class="record-col-type"><col class="record-col-hours"><col class="record-col-amount"><col class="record-col-action"></colgroup><thead><tr><th>日期</th><th>星期</th><th>假別／加班類別</th><th class="num">時數</th><th class="num">扣薪／加班費</th><th>操作</th></tr></thead><tbody id="recordBody"></tbody></table></div>
 </div></section>
 
 <section id="annual" class="hidden"><div class="card">
  <div class="page-heading"><div class="section-title">年度請假統計</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
  <label>統計年度</label><input id="yearPick" type="number" min="2020" max="2100">
  <div id="annualBody" class="annual-c-list" aria-label="年度請假統計"></div>
-<div class="section-title" style="margin-top:18px">年度加班統計</div><div class="grid"><div class="kpi"><b>加班總時數</b><span id="annualOtHours">0</span></div><div class="kpi"><b>加班費合計</b><span id="annualOtPay">$0</span></div></div><div class="tablewrap annual-tablewrap"><table class="annual-overtime-table"><thead><tr><th>加班類別</th><th>次數</th><th>時數</th><th>加班費</th></tr></thead><tbody id="annualOtBody"></tbody></table></div></div></section>
+<div class="section-title" style="margin-top:18px">年度加班統計</div><div class="grid"><div class="kpi"><b>加班總時數</b><span id="annualOtHours">0</span></div><div class="kpi"><b>加班費合計</b><span id="annualOtPay">$0</span></div></div><div id="annualOtBody" class="annual-c-list annual-ot-c-list" aria-label="年度加班統計"></div></div></section>
 
 <section id="settings" class="hidden">
  <div class="card">
@@ -369,7 +387,18 @@ function renderAnnual(){
  const ots=overtimeItems(String(y)+'-'),types=['weekday','rest','holiday','regular','extra'];
  $('annualOtHours').textContent=hourText(ots.reduce((a,x)=>a+Number(x.hours||0),0));
  $('annualOtPay').textContent=money(ots.reduce((a,x)=>a+overtimePay(x),0));
- $('annualOtBody').innerHTML=types.map(t=>{const arr=ots.filter(x=>x.otType===t);return `<tr><td>${overtimeLabel(t)}</td><td>${arr.length}</td><td>${hourText(arr.reduce((a,x)=>a+Number(x.hours||0),0))}</td><td>${money(arr.reduce((a,x)=>a+overtimePay(x),0))}</td></tr>`}).join('');
+ $('annualOtBody').innerHTML=types.map(t=>{
+  const arr=ots.filter(x=>x.otType===t);
+  const hours=arr.reduce((a,x)=>a+Number(x.hours||0),0);
+  const pay=arr.reduce((a,x)=>a+overtimePay(x),0);
+  return `<div class="annual-c-item">
+    <div class="annual-c-top"><span class="annual-c-name">${overtimeLabel(t)}</span><span class="annual-c-count">${arr.length} 次</span></div>
+    <div class="annual-c-metrics">
+      <div class="annual-c-metric"><span class="annual-c-label">加班時數</span><span class="annual-c-value annual-c-hours">${hourText(hours)}</span></div>
+      <div class="annual-c-metric"><span class="annual-c-label">加班費</span><span class="annual-c-value annual-c-days">${money(pay)}</span></div>
+    </div>
+  </div>`;
+ }).join('');
 }
 function refreshAll(){refreshHome();refreshSpecial();renderRecords();renderAnnual()}
 
