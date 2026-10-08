@@ -75,6 +75,20 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
  .records-table .danger{padding:6px 3px;font-size:11px}
  .date-long{display:none}.date-short{display:inline;white-space:nowrap}
 }
+
+/* 年度請假統計 C 款：假別獨立一行、數字三欄，避免手機橫向擠壓 */
+.annual-c-list{display:flex;flex-direction:column;gap:0;margin-top:12px}
+.annual-c-item{padding:14px 3px 15px;border-bottom:1px solid #e5eaf0}
+.annual-c-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.annual-c-name{font-weight:700;font-size:15px;color:#193d5c;overflow-wrap:anywhere}
+.annual-c-count{font-size:13px;color:#64748b;white-space:nowrap}
+.annual-c-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.annual-c-metric{min-width:0;border-radius:10px;background:#f6f9fc;padding:10px 7px}
+.annual-c-label{display:block;font-size:12px;color:#64748b;margin-bottom:6px}
+.annual-c-value{display:block;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.annual-c-hours{color:#2262a1}.annual-c-deduct{color:#b42318}.annual-c-days{color:#16824a}
+.annual-c-zero{color:#687586}
+@media(max-width:360px){.annual-c-metrics{gap:5px}.annual-c-metric{padding:9px 5px}.annual-c-value{font-size:15px}}
 </style>
 </head>
 <body>
@@ -134,7 +148,7 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
 <section id="annual" class="hidden"><div class="card">
  <div class="page-heading"><div class="section-title">年度請假統計</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
  <label>統計年度</label><input id="yearPick" type="number" min="2020" max="2100">
- <div class="tablewrap annual-tablewrap"><table class="annual-leave-table"><thead><tr><th>假別</th><th>次數</th><th>時數</th><th>扣薪</th><th>8小時日數</th></tr></thead><tbody id="annualBody"></tbody></table></div>
+ <div id="annualBody" class="annual-c-list" aria-label="年度請假統計"></div>
 <div class="section-title" style="margin-top:18px">年度加班統計</div><div class="grid"><div class="kpi"><b>加班總時數</b><span id="annualOtHours">0</span></div><div class="kpi"><b>加班費合計</b><span id="annualOtPay">$0</span></div></div><div class="tablewrap annual-tablewrap"><table class="annual-overtime-table"><thead><tr><th>加班類別</th><th>次數</th><th>時數</th><th>加班費</th></tr></thead><tbody id="annualOtBody"></tbody></table></div></div></section>
 
 <section id="settings" class="hidden">
@@ -342,7 +356,15 @@ function renderAnnual(){
  $("annualBody").innerHTML=data.types.map(t=>{
   const ls=data.leaves.filter(x=>String(x.date||"").startsWith(y+"-")&&x.type===t[0]);let h=0,p=0,d=0;
   ls.forEach(x=>{const c=calc(x);h+=Number(x.hours)||0;p+=c.paid;d+=c.deduct});
-  return `<tr><td>${t[0]}</td><td class="num">${ls.length}</td><td class="num">${hourText(h)}</td><td class="num">${money(d)}</td><td class="num">${(h/(Number(data.settings.dailyHours)||8)).toFixed(2)}</td></tr>`;
+  const days=(h/8).toFixed(1);
+  return `<div class="annual-c-item">
+    <div class="annual-c-top"><span class="annual-c-name">${t[0]}</span><span class="annual-c-count">${ls.length} 次</span></div>
+    <div class="annual-c-metrics">
+      <div class="annual-c-metric"><span class="annual-c-label">時數</span><span class="annual-c-value annual-c-hours">${hourText(h)}</span></div>
+      <div class="annual-c-metric"><span class="annual-c-label">扣薪</span><span class="annual-c-value ${d>0?'annual-c-deduct':'annual-c-zero'}">${money(d)}</span></div>
+      <div class="annual-c-metric"><span class="annual-c-label">8小時日數</span><span class="annual-c-value annual-c-days">${days}</span></div>
+    </div>
+  </div>`;
  }).join("");
  const ots=overtimeItems(String(y)+'-'),types=['weekday','rest','holiday','regular','extra'];
  $('annualOtHours').textContent=hourText(ots.reduce((a,x)=>a+Number(x.hours||0),0));
