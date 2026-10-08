@@ -93,7 +93,7 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
  <label>證明／單號</label><input id="proof" type="text" placeholder="可留空">
  <label>備註</label><input id="note" type="text" placeholder="可留空">
  <div class="actions"><button class="primary" id="saveLeaveBtn">儲存紀錄</button></div>
- <p class="muted">星期、時薪、給薪比例、應給薪資與扣薪金額會自動計算。</p>
+ <p class="muted">請假與加班可分別單獨儲存；加班費依所選加班類別試算。</p>
 </div></section>
 
 <section id="records" class="hidden"><div class="card">
@@ -332,10 +332,26 @@ function showTab(id,btn){
  window.scrollTo(0,0);
 }
 function saveLeave(){
- const date=$("leaveDate").value,type=$("leaveType").value,h=Number($("hours").value);
- if(!date||!type||!(h>0)){alert("請填入日期、假別及請假時數");return}
- data.leaves.push({id:String(Date.now()),date,type,hours:h,proof:$("proof").value,note:$("note").value});
- persist();$("monthPick").value=date.slice(0,7);$("recordMonthPick").value=date.slice(0,7);$("hours").value="";$("proof").value="";$("note").value="";refreshAll();alert("已儲存");
+ const date=$('leaveDate').value;
+ if(!date){alert('請選擇日期');return}
+ const isOvertime=$('entryKind').value==='overtime';
+ const proof=$('proof').value,note=$('note').value;
+ if(isOvertime){
+  const hours=Number($('overtimeHours').value),otType=$('overtimeType').value;
+  if(!Number.isFinite(hours)||hours<=0||hours>12){alert('請輸入正確的加班時數（大於 0 且不超過 12 小時）');return}
+  if(otType==='weekday'&&hours>4){alert('平日延長工時單日通常不得超過 4 小時，請確認加班時數');return}
+  const hourlyAtEntry=baseHourly();
+  if(!(hourlyAtEntry>0)){alert('請先到設定填寫時薪或月薪');return}
+  data.overtimes.push({id:String(Date.now()),date,otType,hours,hourlyAtEntry,proof,note});
+ }else{
+  const type=$('leaveType').value,hours=Number($('hours').value);
+  if(!type||!(hours>0)){alert('請填寫假別及請假時數');return}
+  data.leaves.push({id:String(Date.now()),date,type,hours,proof,note});
+ }
+ persist();$('monthPick').value=date.slice(0,7);$('recordMonthPick').value=date.slice(0,7);
+ if(isOvertime)$('overtimeHours').value='';else $('hours').value='';
+ $('proof').value='';$('note').value='';refreshAll();
+ alert(isOvertime?'加班紀錄已儲存':'請假紀錄已儲存');
 }
 function saveSettings(){
  for(const k of Object.keys(DEFAULT_SETTINGS)){if(k==="payType"){data.settings[k]=$(k).value;continue}const v=Number($(k).value);data.settings[k]=Number.isFinite(v)?v:DEFAULT_SETTINGS[k]}
