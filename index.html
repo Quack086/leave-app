@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4e78">
 <link rel="manifest" href="manifest.webmanifest">
-<title>時薪制請假紀錄</title>
+<title>請假紀錄表</title>
 <style>
 :root{--blue:#1f4e78;--light:#d9eaf7;--bg:#f4f7fb;--line:#d8dee8;--red:#b42318}
 *{box-sizing:border-box}
@@ -49,7 +49,7 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
 </style>
 </head>
 <body>
-<header>時薪制員工請假紀錄表（台灣）</header>
+<header>請假紀錄表</header>
 <main>
 <section id="home">
  <div class="card"><div class="page-heading"><div class="section-title">月份總覽</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
@@ -69,7 +69,8 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
    <div class="kpi"><b>扣薪金額</b><span id="deduct">$0</span></div>
   </div>
  </div>
- <div class="card annual-leave-card">
+ <div class="card"><div class="section-title">本月加班</div><div class="grid"><div class="kpi"><b>加班次數</b><span id="otCount">0</span></div><div class="kpi"><b>加班時數</b><span id="otHours">0</span></div><div class="kpi"><b>加班費</b><span id="otPay">$0</span></div><div class="kpi"><b>含加班實領薪資</b><span id="netWithOT">$0</span></div></div></div>
+  <div class="card annual-leave-card">
   <div class="annual-leave-head"><div class="section-title">本年度特休</div><span class="pill" id="leaveModeBadge">依法計算</span></div>
   <div class="muted" id="specialPeriod">請至設定填寫到職日期</div>
   <div class="leave-stats">
@@ -82,27 +83,30 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
 </section>
 
 <section id="add" class="hidden"><div class="card">
- <div class="page-heading"><div class="section-title">新增請假</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
- <label>日期</label><input id="leaveDate" type="date">
+ <div class="page-heading"><div class="section-title">新增請假/加班</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
+ <label>紀錄類型</label><select id="entryKind"><option value="leave">請假</option><option value="overtime">加班</option></select>
+  <label>日期</label><input id="leaveDate" type="date">
+  <div id="leaveEntryFields">
  <label>假別</label><select id="leaveType"></select>
  <label>請假時數</label><input id="hours" type="number" min="0" step="0.5" placeholder="例如 8">
+  </div><div id="overtimeEntryFields" class="hidden"><label>加班類別（依實際約定日別選擇）</label><select id="overtimeType"><option value="weekday">平日延長工時</option><option value="rest">休息日</option><option value="holiday">國定假日／特別休假日</option><option value="regular">例假日（僅法定緊急情況）</option><option value="extra">部分工時約定外、法定正常工時內（一般工資）</option></select><label>加班時數</label><input id="overtimeHours" type="number" min="0" max="12" step="0.5" placeholder="例如 2"><p class="muted">休息日與國定假日依實際出勤日別計算；國定假日若已調移，請勿重複計算。</p></div>
  <label>證明／單號</label><input id="proof" type="text" placeholder="可留空">
  <label>備註</label><input id="note" type="text" placeholder="可留空">
- <div class="actions"><button class="primary" id="saveLeaveBtn">儲存請假</button></div>
+ <div class="actions"><button class="primary" id="saveLeaveBtn">儲存紀錄</button></div>
  <p class="muted">星期、時薪、給薪比例、應給薪資與扣薪金額會自動計算。</p>
 </div></section>
 
 <section id="records" class="hidden"><div class="card">
  <div class="page-heading"><div class="section-title">月份紀錄</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
  <label>觀看月份</label><input id="recordMonthPick" type="month">
- <div class="tablewrap"><table><thead><tr><th>日期</th><th>星期</th><th>假別</th><th>時數</th><th>扣薪</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
+ <div class="tablewrap"><table><thead><tr><th>日期</th><th>星期</th><th>假別／加班類別</th><th>時數</th><th>扣薪／加班費</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
 </div></section>
 
 <section id="annual" class="hidden"><div class="card">
  <div class="page-heading"><div class="section-title">年度請假統計</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
  <label>統計年度</label><input id="yearPick" type="number" min="2020" max="2100">
  <div class="tablewrap"><table><thead><tr><th>假別</th><th>次數</th><th>時數</th><th>應給</th><th>扣薪</th><th>8小時日數</th></tr></thead><tbody id="annualBody"></tbody></table></div>
-</div></section>
+<div class="section-title" style="margin-top:18px">年度加班統計</div><div class="grid"><div class="kpi"><b>加班總時數</b><span id="annualOtHours">0</span></div><div class="kpi"><b>加班費合計</b><span id="annualOtPay">$0</span></div></div><div class="tablewrap"><table><thead><tr><th>加班類別</th><th>次數</th><th>時數</th><th>加班費</th></tr></thead><tbody id="annualOtBody"></tbody></table></div></div></section>
 
 <section id="settings" class="hidden">
  <div class="card">
@@ -112,8 +116,11 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
   <p class="muted">為避免 iPhone／GitHub Pages 跨網站連線失敗，本版直接使用已核對的行政院人事行政總處 2026 年資料，不再由手機直接連政府 API。</p>
   <hr style="border:0;border-top:1px solid #e6eaf0;margin:16px 0">
   <div class="section-title">薪資設定</div>
+   <label>薪資制度</label><select id="payType"><option value="hourly">時薪制</option><option value="monthly">月薪制</option></select>
+   <div id="payMethodHint" class="muted"></div>
   <div class="grid">
-   <div><label>目前時薪</label><input id="hourly" type="number"></div>
+   <div id="hourlySetting"><label>目前時薪</label><input id="hourly" type="number"></div>
+    <div id="monthlySetting" class="hidden"><label>月薪（正常工時工資）</label><input id="monthlySalary" type="number" min="0"></div>
    <div><label>每日工時</label><input id="dailyHours" type="number"></div>
    <div><label>勞保</label><input id="labor" type="number"></div>
    <div><label>健保</label><input id="health" type="number"></div>
@@ -149,14 +156,14 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
 
 <nav>
 <button data-tab="home" class="active">首頁</button>
-<button data-tab="add">新增請假</button>
+<button data-tab="add">新增請假/加班</button>
 <button data-tab="records">月份紀錄</button>
 <button data-tab="annual">年度統計</button>
 <button data-tab="settings">設定</button>
 </nav>
 
 <script>
-const DEFAULT_SETTINGS={hourly:196,dailyHours:8,labor:758,health:470,welfare:141,otherDeduct:3};
+const DEFAULT_SETTINGS={payType:"hourly",monthlySalary:29500,hourly:196,dailyHours:8,labor:758,health:470,welfare:141,otherDeduct:3};
 const DEFAULT_SPECIAL={hireDate:"",startMonth:7,startDay:1,workPattern:"full",weeklyHours:40,weeklyDays:5,mode:"auto",manualHours:0,carryHours:0};
 const DEFAULT_TYPES=[
  ["事假",0],["普通傷病假",0.5],["生理假",0.5],["特別休假",1],["婚假",1],["喪假",1],
@@ -181,7 +188,7 @@ function safeLoad(){
  // 永遠補回 2026 官方資料，不動其他年度
  holidays=holidays.filter(x=>!x.startsWith("2026-")).concat(OFFICIAL_2026);
  holidays=[...new Set(holidays)].sort();
- return {settings,special:{...DEFAULT_SPECIAL,...(raw.special||{})},types,holidays,leaves:Array.isArray(raw.leaves)?raw.leaves:[],holidaySync:raw.holidaySync||null};
+ return {settings,special:{...DEFAULT_SPECIAL,...(raw.special||{})},types,holidays,leaves:Array.isArray(raw.leaves)?raw.leaves:[],holidaySync:raw.holidaySync||null,overtimes:Array.isArray(raw.overtimes)?raw.overtimes:[]};
 }
 let data=safeLoad();
 function persist(){localStorage.setItem("twLeaveApp",JSON.stringify(data))}
@@ -191,13 +198,28 @@ function todayMonth(){const d=new Date();return `${d.getFullYear()}-${String(d.g
 function todayDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function weekday(s){const d=new Date(s+"T12:00:00");return ["週日","週一","週二","週三","週四","週五","週六"][d.getDay()]}
 function rateFor(type){const x=data.types.find(t=>t[0]===type);return x?Number(x[1])||0:0}
-function calc(l){const rate=rateFor(l.type),hours=Number(l.hours)||0,hourly=Number(data.settings.hourly)||0;return {rate,paid:hours*hourly*rate,deduct:hours*hourly*(1-rate)}}
+function baseHourly(){return data.settings.payType==='monthly'?(Number(data.settings.monthlySalary)||0)/240:(Number(data.settings.hourly)||0)}
+function overtimeLabel(type){return ({weekday:'平日延長工時',rest:'休息日',holiday:'國定假日／特休出勤',regular:'例假日緊急出勤',extra:'部分工時約定外正常工時'})[type]||type}
+function overtimePay(l){
+ const h=Number(l.hours)||0,r=Number(l.hourlyAtEntry)||baseHourly(),d=Math.max(1,Number(data.settings.dailyHours)||8);
+ if(l.otType==='extra')return h*r;
+ const segmented=(a,b,c)=>Math.min(h,2)*a+Math.min(Math.max(h-2,0),6)*b+Math.max(h-8,0)*c;
+ if(l.otType==='weekday')return r*(Math.min(h,2)*4/3+Math.max(h-2,0)*5/3);
+ if(l.otType==='rest')return r*segmented(4/3,5/3,8/3);
+ if(l.otType==='holiday')return r*(Math.min(d,8)+(Math.min(Math.max(h-8,0),2)*4/3)+(Math.max(h-10,0)*5/3));
+ if(l.otType==='regular')return r*Math.min(d,8);
+ return 0;
+}
+function calc(l){const rate=rateFor(l.type),hours=Number(l.hours)||0,hourly=baseHourly();return {rate,paid:hours*hourly*rate,deduct:hours*hourly*(1-rate)}}
+function overtimeItems(month){return (data.overtimes||[]).filter(x=>String(x.date||'').startsWith(month))}
+function toggleEntry(){const ot=$('entryKind').value==='overtime';$('leaveEntryFields').classList.toggle('hidden',ot);$('overtimeEntryFields').classList.toggle('hidden',!ot)}
+function togglePay(){const monthly=$('payType').value==='monthly';$('hourlySetting').classList.toggle('hidden',monthly);$('monthlySetting').classList.toggle('hidden',!monthly);$('payMethodHint').textContent=monthly?'月薪制：平日每小時工資以月薪 ÷ 240 試算。':'時薪制：以設定時薪為基準；部分工時約定外但未超過法定正常工時者，按一般工資計算。'}
 
 function fillLeaveTypes(){
  $("leaveType").innerHTML=data.types.map(x=>`<option value="${x[0]}">${x[0]}</option>`).join("");
 }
 function loadSettings(){
- for(const k of Object.keys(DEFAULT_SETTINGS)) $(k).value=data.settings[k];
+ for(const k of Object.keys(DEFAULT_SETTINGS)) $(k).value=data.settings[k];togglePay();
  for(const [id,key] of Object.entries({hireDate:'hireDate',specialStartMonth:'startMonth',specialStartDay:'startDay',workPattern:'workPattern',weeklyHours:'weeklyHours',weeklyDays:'weeklyDays',specialMode:'mode',manualSpecialHours:'manualHours',carrySpecialHours:'carryHours'})) $(id).value=data.special[key];
  $("manualSpecialDays").value=fmtDays(Number(data.special.manualHours)||0,Math.max(.1,Number(data.settings.dailyHours)||8));
  previewSpecial();
@@ -271,16 +293,19 @@ function refreshHome(){
  const [wd,hd]=workdays(m);
  let hours=0,paid=0,deduct=0;
  ls.forEach(l=>{hours+=Number(l.hours)||0;const c=calc(l);paid+=c.paid;deduct+=c.deduct});
- const gross=wd*(Number(data.settings.dailyHours)||8)*(Number(data.settings.hourly)||0);
+ const gross=data.settings.payType==='monthly'?(Number(data.settings.monthlySalary)||0):wd*(Number(data.settings.dailyHours)||8)*baseHourly();
+  const ots=overtimeItems(m),otHours=ots.reduce((a,x)=>a+Number(x.hours||0),0),otPay=ots.reduce((a,x)=>a+overtimePay(x),0);
  const fixed=(Number(data.settings.labor)||0)+(Number(data.settings.health)||0)+(Number(data.settings.welfare)||0)+(Number(data.settings.otherDeduct)||0);
  $("workDays").textContent=wd;$("holidayDays").textContent=hd;$("gross").textContent=money(gross);$("net").textContent=money(gross-deduct-fixed);
- $("leaveCount").textContent=ls.length;$("leaveHours").textContent=hours.toFixed(2);$("paidLeave").textContent=money(paid);$("deduct").textContent=money(deduct);
+ $("otCount").textContent=ots.length;$("otHours").textContent=otHours.toFixed(2);$("otPay").textContent=money(otPay);$("netWithOT").textContent=money(gross-deduct-fixed+otPay);
+  $("leaveCount").textContent=ls.length;$("leaveHours").textContent=hours.toFixed(2);$("paidLeave").textContent=money(paid);$("deduct").textContent=money(deduct);
 }
 function renderRecords(){
  const m=$("recordMonthPick").value||todayMonth();
  if(!$("recordMonthPick").value)$("recordMonthPick").value=m;
  const ls=data.leaves.filter(x=>String(x.date||"").startsWith(m)).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
- $("recordBody").innerHTML=ls.length?ls.map(l=>{const c=calc(l);return `<tr><td>${l.date}</td><td>${weekday(l.date)}</td><td><span class="pill">${l.type}</span></td><td class="num">${Number(l.hours||0).toFixed(2)}</td><td class="num">${money(c.deduct)}</td><td><button class="danger" data-del="${l.id}">刪除</button></td></tr>`}).join(""):`<tr><td colspan="6" style="text-align:center;padding:24px">此月份尚無請假紀錄</td></tr>`;
+ const ots=overtimeItems(m);
+  $("recordBody").innerHTML=(ls.length||ots.length)?ls.map(l=>{const c=calc(l);return `<tr><td>${l.date}</td><td>${weekday(l.date)}</td><td><span class="pill">${l.type}</span></td><td class="num">${Number(l.hours||0).toFixed(2)}</td><td class="num">${money(c.deduct)}</td><td><button class="danger" data-del="${l.id}">刪除</button></td></tr>`}).concat(ots.map(o=>`<tr><td>${o.date}</td><td>${weekday(o.date)}</td><td><span class="pill">加班：${overtimeLabel(o.otType)}</span></td><td class="num">${Number(o.hours).toFixed(2)}</td><td class="num">+${money(overtimePay(o))}</td><td><button class="danger" data-otdel="${o.id}">刪除</button></td></tr>`)).join(""):`<tr><td colspan="6" style="text-align:center;padding:24px">此月份尚無紀錄</td></tr>`;
 }
 function renderAnnual(){
  const y=Number($("yearPick").value)||new Date().getFullYear();
@@ -289,6 +314,10 @@ function renderAnnual(){
   ls.forEach(x=>{const c=calc(x);h+=Number(x.hours)||0;p+=c.paid;d+=c.deduct});
   return `<tr><td>${t[0]}</td><td class="num">${ls.length}</td><td class="num">${h.toFixed(2)}</td><td class="num">${money(p)}</td><td class="num">${money(d)}</td><td class="num">${(h/(Number(data.settings.dailyHours)||8)).toFixed(2)}</td></tr>`;
  }).join("");
+ const ots=overtimeItems(String(y)+'-'),types=['weekday','rest','holiday','regular','extra'];
+ $('annualOtHours').textContent=ots.reduce((a,x)=>a+Number(x.hours||0),0).toFixed(2);
+ $('annualOtPay').textContent=money(ots.reduce((a,x)=>a+overtimePay(x),0));
+ $('annualOtBody').innerHTML=types.map(t=>{const arr=ots.filter(x=>x.otType===t);return `<tr><td>${overtimeLabel(t)}</td><td>${arr.length}</td><td>${arr.reduce((a,x)=>a+Number(x.hours||0),0).toFixed(2)}</td><td>${money(arr.reduce((a,x)=>a+overtimePay(x),0))}</td></tr>`}).join('');
 }
 function refreshAll(){refreshHome();refreshSpecial();renderRecords();renderAnnual()}
 
@@ -309,7 +338,7 @@ function saveLeave(){
  persist();$("monthPick").value=date.slice(0,7);$("recordMonthPick").value=date.slice(0,7);$("hours").value="";$("proof").value="";$("note").value="";refreshAll();alert("已儲存");
 }
 function saveSettings(){
- for(const k of Object.keys(DEFAULT_SETTINGS)){const v=Number($(k).value);data.settings[k]=Number.isFinite(v)?v:DEFAULT_SETTINGS[k]}
+ for(const k of Object.keys(DEFAULT_SETTINGS)){if(k==="payType"){data.settings[k]=$(k).value;continue}const v=Number($(k).value);data.settings[k]=Number.isFinite(v)?v:DEFAULT_SETTINGS[k]}
  persist();loadSettings();refreshAll();alert("設定已儲存");
 }
 function updateHoliday(){
@@ -323,19 +352,20 @@ function showHolidayStatus(){
  $("holidayStatus").textContent=s?`已更新 2026 年｜${new Date(s.updatedAt).toLocaleString("zh-TW")}`:"2026 年官方資料已內建";
 }
 function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function exportCSV(){const rows=[["日期","星期","假別","請假時數","時薪","給薪比例","應給薪資","扣薪金額","證明/單號","備註"]];data.leaves.forEach(l=>{const c=calc(l);rows.push([l.date,weekday(l.date),l.type,l.hours,data.settings.hourly,c.rate,c.paid,c.deduct,l.proof||"",l.note||""])});download("請假紀錄.csv","\ufeff"+rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n"),"text/csv;charset=utf-8")}
+function exportCSV(){const rows=[["日期","星期","假別","請假時數","時薪","給薪比例","應給薪資","扣薪金額","證明/單號","備註"]];data.leaves.forEach(l=>{const c=calc(l);rows.push([l.date,weekday(l.date),l.type,l.hours,baseHourly(),c.rate,c.paid,c.deduct,l.proof||"",l.note||""])});data.overtimes.forEach(o=>rows.push([o.date,weekday(o.date),"加班："+overtimeLabel(o.otType),o.hours,o.hourlyAtEntry||baseHourly(),"",overtimePay(o),0,"",""]));download("請假紀錄.csv","\ufeff"+rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n"),"text/csv;charset=utf-8")}
 function backupJSON(){download("時薪制請假APP備份.json",JSON.stringify(data,null,2),"application/json")}
 function restoreJSON(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{localStorage.setItem("twLeaveApp",r.result);data=safeLoad();persist();fillLeaveTypes();loadSettings();refreshAll();showHolidayStatus();alert("備份已還原")}catch(e){alert("備份檔格式錯誤")}};r.readAsText(f)}
 
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab,b)));
 $("saveLeaveBtn").addEventListener("click",saveLeave);
+$("entryKind").addEventListener("change",toggleEntry);$("payType").addEventListener("change",togglePay);
 $("saveSettingsBtn").addEventListener("click",saveSettings);
 $("saveSpecialBtn").addEventListener("click",saveSpecial);
 $('manualSpecialDays').addEventListener('input',()=>syncManualSpecial('days'));
 $('manualSpecialHours').addEventListener('input',()=>syncManualSpecial('hours'));
 $('dailyHours').addEventListener('change',()=>syncManualSpecial('days'));
 document.querySelectorAll('[data-refresh]').forEach(b=>b.addEventListener('click',()=>{
- data=safeLoad();fillLeaveTypes();loadSettings();showHolidayStatus();refreshAll();
+ data=safeLoad();fillLeaveTypes();loadSettings();toggleEntry();showHolidayStatus();refreshAll();
  b.textContent='✓ 已更新';setTimeout(()=>b.textContent='↻ 重新整理',1200);
 }));
 $("specialMode").addEventListener("change",()=>{$("specialPreview").textContent=$("specialMode").value==="manual"?"手動模式：輸入年度特休時數；結轉另加。":"自動模式：依年資及工作型態試算，特殊排班須人工核對。"});
@@ -348,10 +378,11 @@ $("monthPick").addEventListener("change",refreshHome);
 $("recordMonthPick").addEventListener("change",renderRecords);
 $("yearPick").addEventListener("input",renderAnnual);
 $("recordBody").addEventListener("click",e=>{const id=e.target.dataset.del;if(id&&confirm("確定刪除這筆請假紀錄？")){data.leaves=data.leaves.filter(x=>x.id!==id);persist();refreshAll()}});
+$("recordBody").addEventListener("click",e=>{const id=e.target.dataset.otdel;if(id&&confirm("確定刪除這筆加班紀錄？")){data.overtimes=data.overtimes.filter(x=>x.id!==id);persist();refreshAll()}});
 
 function init(){
  $("monthPick").value=todayMonth();$("recordMonthPick").value=todayMonth();$("yearPick").value=new Date().getFullYear();$("leaveDate").value=todayDate();
- fillLeaveTypes();loadSettings();showHolidayStatus();refreshAll();
+ fillLeaveTypes();loadSettings();toggleEntry();showHolidayStatus();refreshAll();
 }
 if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
 init();
