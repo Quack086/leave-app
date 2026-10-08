@@ -109,6 +109,22 @@ nav button{flex:1;background:#fff;color:#456;border-radius:0;padding:13px 4px;fo
   </div>
   <div class="actions"><button class="primary" id="saveSettingsBtn">儲存設定</button><button class="secondary" id="csvBtn">匯出CSV</button></div>
  </div>
+ <div class="card">
+  <div class="section-title">特休設定（時薪制）</div>
+  <label>到職日期</label><input id="hireDate" type="date">
+  <div class="grid">
+   <div><label>特休年度起算月份</label><select id="specialStartMonth"><option value="1">1 月</option><option value="2">2 月</option><option value="3">3 月</option><option value="4">4 月</option><option value="5">5 月</option><option value="6">6 月</option><option value="7">7 月</option><option value="8">8 月</option><option value="9">9 月</option><option value="10">10 月</option><option value="11">11 月</option><option value="12">12 月</option></select></div>
+   <div><label>起算日（1～28）</label><input id="specialStartDay" type="number" min="1" max="28"></div>
+   <div><label>工作型態</label><select id="workPattern"><option value="full">全時工作</option><option value="part">固定部分工時</option><option value="shift">不固定排班</option></select></div>
+   <div><label>每週約定工時</label><input id="weeklyHours" type="number" min="0" max="40" step="0.5"></div>
+   <div><label>每週工作天數</label><input id="weeklyDays" type="number" min="1" max="7" step="1"></div>
+   <div><label>計算模式</label><select id="specialMode"><option value="auto">依法自動試算</option><option value="manual">手動設定</option></select></div>
+   <div><label>手動年度特休（小時）</label><input id="manualSpecialHours" type="number" min="0" step="0.5"></div>
+   <div><label>前期結轉（小時）</label><input id="carrySpecialHours" type="number" min="0" step="0.5"></div>
+  </div>
+  <p class="muted" id="specialPreview">依年資與工作型態試算；實際權益請依公司制度核對。</p>
+  <div class="actions"><button class="primary" id="saveSpecialBtn">儲存特休設定</button></div>
+ </div>
  <div class="card"><div class="section-title">資料備份</div>
   <div class="actions"><button class="secondary" id="backupBtn">下載備份</button><button class="secondary" id="restoreBtn">還原備份</button></div>
   <input id="restoreFile" class="hidden" type="file" accept=".json">
@@ -168,6 +184,8 @@ function fillLeaveTypes(){
 }
 function loadSettings(){
  for(const k of Object.keys(DEFAULT_SETTINGS)) $(k).value=data.settings[k];
+ for(const [id,key] of Object.entries({hireDate:'hireDate',specialStartMonth:'startMonth',specialStartDay:'startDay',workPattern:'workPattern',weeklyHours:'weeklyHours',weeklyDays:'weeklyDays',specialMode:'mode',manualSpecialHours:'manualHours',carrySpecialHours:'carryHours'})) $(id).value=data.special[key];
+ previewSpecial();
 }
 
 // 民法日期運算使用當地中午，避免跨時區日期偏移。
