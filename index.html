@@ -46,6 +46,13 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
 .page-heading .section-title{margin:0}
 .refresh-btn{flex:none;background:#eaf2f8;color:#1f4e78;padding:7px 10px;font-size:12px;border:1px solid #d6e5f0;border-radius:8px}
 @media(max-width:360px){main{padding-left:9px;padding-right:9px}.card{padding:11px}.grid{gap:7px}input,select{padding:9px 6px}.refresh-btn{font-size:11px}}
+/* 年度統計專用欄寬：取消原本手機版 650px 最小寬度造成的巨大空白 */
+.annual-tablewrap{overflow-x:auto}
+.annual-tablewrap table{table-layout:auto;width:max-content;min-width:0;max-width:none;font-size:13px}
+.annual-tablewrap th,.annual-tablewrap td{padding:9px 7px;white-space:nowrap}
+.annual-leave-table th:first-child,.annual-leave-table td:first-child{min-width:108px}
+.annual-overtime-table th:first-child,.annual-overtime-table td:first-child{min-width:100px}
+.annual-tablewrap .num{text-align:right}
 </style>
 </head>
 <body>
@@ -105,8 +112,8 @@ input::-webkit-date-and-time-value{text-align:center;min-width:0}
 <section id="annual" class="hidden"><div class="card">
  <div class="page-heading"><div class="section-title">年度請假統計</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
  <label>統計年度</label><input id="yearPick" type="number" min="2020" max="2100">
- <div class="tablewrap"><table><thead><tr><th>假別</th><th>次數</th><th>時數</th><th>應給</th><th>扣薪</th><th>8小時日數</th></tr></thead><tbody id="annualBody"></tbody></table></div>
-<div class="section-title" style="margin-top:18px">年度加班統計</div><div class="grid"><div class="kpi"><b>加班總時數</b><span id="annualOtHours">0</span></div><div class="kpi"><b>加班費合計</b><span id="annualOtPay">$0</span></div></div><div class="tablewrap"><table><thead><tr><th>加班類別</th><th>次數</th><th>時數</th><th>加班費</th></tr></thead><tbody id="annualOtBody"></tbody></table></div></div></section>
+ <div class="tablewrap annual-tablewrap"><table class="annual-leave-table"><thead><tr><th>假別</th><th>次數</th><th>時數</th><th>應給</th><th>扣薪</th><th>8小時日數</th></tr></thead><tbody id="annualBody"></tbody></table></div>
+<div class="section-title" style="margin-top:18px">年度加班統計</div><div class="grid"><div class="kpi"><b>加班總時數</b><span id="annualOtHours">0</span></div><div class="kpi"><b>加班費合計</b><span id="annualOtPay">$0</span></div></div><div class="tablewrap annual-tablewrap"><table class="annual-overtime-table"><thead><tr><th>加班類別</th><th>次數</th><th>時數</th><th>加班費</th></tr></thead><tbody id="annualOtBody"></tbody></table></div></div></section>
 
 <section id="settings" class="hidden">
  <div class="card">
@@ -167,7 +174,7 @@ const DEFAULT_SETTINGS={payType:"hourly",monthlySalary:29500,hourly:196,dailyHou
 const DEFAULT_SPECIAL={hireDate:"",startMonth:7,startDay:1,workPattern:"full",weeklyHours:40,weeklyDays:5,mode:"auto",manualHours:0,carryHours:0};
 const DEFAULT_TYPES=[
  ["事假",0],["普通傷病假",0.5],["生理假",0.5],["特別休假",1],["婚假",1],["喪假",1],
- ["公假",1],["公傷病假",1],["家庭照顧假",0],["產檢假/陪產檢及陪產假",1],["其他",0]
+ ["公假",1],["公傷病假",1],["家庭照顧假",0],["產檢/陪產檢假",1],["其他",0]
 ];
 const OFFICIAL_2026=["2026-01-01","2026-02-16","2026-02-17","2026-02-18","2026-02-19","2026-02-20","2026-02-27","2026-04-03","2026-04-06","2026-05-01","2026-06-19","2026-09-25","2026-09-28","2026-10-09","2026-10-26","2026-12-25"];
 const $=id=>document.getElementById(id);
@@ -188,7 +195,7 @@ function safeLoad(){
  // 永遠補回 2026 官方資料，不動其他年度
  holidays=holidays.filter(x=>!x.startsWith("2026-")).concat(OFFICIAL_2026);
  holidays=[...new Set(holidays)].sort();
- return {settings,special:{...DEFAULT_SPECIAL,...(raw.special||{})},types,holidays,leaves:Array.isArray(raw.leaves)?raw.leaves:[],holidaySync:raw.holidaySync||null,overtimes:Array.isArray(raw.overtimes)?raw.overtimes:[]};
+ return {settings,special:{...DEFAULT_SPECIAL,...(raw.special||{})},types,holidays,leaves:Array.isArray(raw.leaves)?raw.leaves.map(l=>l&&l.type==='產檢假/陪產檢及陪產假'?{...l,type:'產檢/陪產檢假'}:l):[],holidaySync:raw.holidaySync||null,overtimes:Array.isArray(raw.overtimes)?raw.overtimes:[]};
 }
 let data=safeLoad();
 function persist(){localStorage.setItem("twLeaveApp",JSON.stringify(data))}
