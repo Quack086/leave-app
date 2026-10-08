@@ -33,13 +33,26 @@ nav button{flex:1;background:#fff;color:#456;border-radius:0;padding:13px 4px;fo
 .muted{color:#6b7280;font-size:13px}.money{color:#174a2e}
 @media(max-width:520px){.grid{grid-template-columns:1fr 1fr}table{min-width:650px}}
 .annual-leave-card{border:1px solid #e1e6ed}.annual-leave-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.leave-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:24px 0 18px;text-align:center}.leave-stat-label{font-size:12px;color:#64748b}.leave-stat-value{font-size:30px;margin:9px 0;font-weight:500}.leave-stat-unit{font-size:14px;color:#64748b}.leave-stat-value.remaining{color:#159447}.hint{font-size:12px;color:#64748b;line-height:1.6}.setting-note{background:#f7fbff;padding:10px;border-radius:9px;margin-top:10px;font-size:12px;color:#536579;line-height:1.6}
+/* iPhone Safari 日期/月分控制項與雙欄設定不得撐出卡片 */
+main,main section,.card,.grid,.grid>div,.kpi,.annual-leave-card{min-width:0;max-width:100%}
+.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+input,select{display:block;min-width:0;max-width:100%;box-sizing:border-box}
+input[type="date"],input[type="month"]{width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;line-height:1.35}
+input::-webkit-date-and-time-value{text-align:center;min-width:0}
+.card{overflow:hidden}
+.tablewrap{max-width:100%;overflow-x:auto}
+.annual-leave-head .section-title{min-width:0}
+.page-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.page-heading .section-title{margin:0}
+.refresh-btn{flex:none;background:#eaf2f8;color:#1f4e78;padding:7px 10px;font-size:12px;border:1px solid #d6e5f0;border-radius:8px}
+@media(max-width:360px){main{padding-left:9px;padding-right:9px}.card{padding:11px}.grid{gap:7px}input,select{padding:9px 6px}.refresh-btn{font-size:11px}}
 </style>
 </head>
 <body>
 <header>時薪制員工請假紀錄表（台灣）</header>
 <main>
 <section id="home">
- <div class="card"><div class="section-title">月份總覽</div>
+ <div class="card"><div class="page-heading"><div class="section-title">月份總覽</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
   <label>月份</label><input id="monthPick" type="month">
   <div class="grid" style="margin-top:12px">
    <div class="kpi"><b>應上班天數</b><span id="workDays">0</span></div>
@@ -69,7 +82,7 @@ nav button{flex:1;background:#fff;color:#456;border-radius:0;padding:13px 4px;fo
 </section>
 
 <section id="add" class="hidden"><div class="card">
- <div class="section-title">新增請假</div>
+ <div class="page-heading"><div class="section-title">新增請假</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
  <label>日期</label><input id="leaveDate" type="date">
  <label>假別</label><select id="leaveType"></select>
  <label>請假時數</label><input id="hours" type="number" min="0" step="0.5" placeholder="例如 8">
@@ -80,20 +93,20 @@ nav button{flex:1;background:#fff;color:#456;border-radius:0;padding:13px 4px;fo
 </div></section>
 
 <section id="records" class="hidden"><div class="card">
- <div class="section-title">月份紀錄</div>
+ <div class="page-heading"><div class="section-title">月份紀錄</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
  <label>觀看月份</label><input id="recordMonthPick" type="month">
  <div class="tablewrap"><table><thead><tr><th>日期</th><th>星期</th><th>假別</th><th>時數</th><th>扣薪</th><th></th></tr></thead><tbody id="recordBody"></tbody></table></div>
 </div></section>
 
 <section id="annual" class="hidden"><div class="card">
- <div class="section-title">年度請假統計</div>
+ <div class="page-heading"><div class="section-title">年度請假統計</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
  <label>統計年度</label><input id="yearPick" type="number" min="2020" max="2100">
  <div class="tablewrap"><table><thead><tr><th>假別</th><th>次數</th><th>時數</th><th>應給</th><th>扣薪</th><th>8小時日數</th></tr></thead><tbody id="annualBody"></tbody></table></div>
 </div></section>
 
 <section id="settings" class="hidden">
  <div class="card">
-  <div class="section-title">台灣國定假日</div>
+  <div class="page-heading"><div class="section-title">台灣國定假日</div><button type="button" class="refresh-btn" data-refresh="1">↻ 重新整理</button></div>
   <div class="kpi"><b>假日資料狀態</b><span id="holidayStatus" style="font-size:15px">讀取中</span></div>
   <div class="actions"><button class="primary" id="holidayBtn">更新國定假日</button></div>
   <p class="muted">為避免 iPhone／GitHub Pages 跨網站連線失敗，本版直接使用已核對的行政院人事行政總處 2026 年資料，不再由手機直接連政府 API。</p>
@@ -119,7 +132,8 @@ nav button{flex:1;background:#fff;color:#456;border-radius:0;padding:13px 4px;fo
    <div><label>每週約定工時</label><input id="weeklyHours" type="number" min="0" max="40" step="0.5"></div>
    <div><label>每週工作天數</label><input id="weeklyDays" type="number" min="1" max="7" step="1"></div>
    <div><label>計算模式</label><select id="specialMode"><option value="auto">依法自動試算</option><option value="manual">手動設定</option></select></div>
-   <div><label>手動年度特休（小時）</label><input id="manualSpecialHours" type="number" min="0" step="0.5"></div>
+   <div><label>手動年度特休（天）</label><input id="manualSpecialDays" type="number" min="0" step="0.25" placeholder="例如 10"></div>
+   <div><label>手動年度特休（小時）</label><input id="manualSpecialHours" type="number" min="0" step="0.5" placeholder="例如 80"></div>
    <div><label>前期結轉（小時）</label><input id="carrySpecialHours" type="number" min="0" step="0.5"></div>
   </div>
   <p class="muted" id="specialPreview">依年資與工作型態試算；實際權益請依公司制度核對。</p>
@@ -185,6 +199,7 @@ function fillLeaveTypes(){
 function loadSettings(){
  for(const k of Object.keys(DEFAULT_SETTINGS)) $(k).value=data.settings[k];
  for(const [id,key] of Object.entries({hireDate:'hireDate',specialStartMonth:'startMonth',specialStartDay:'startDay',workPattern:'workPattern',weeklyHours:'weeklyHours',weeklyDays:'weeklyDays',specialMode:'mode',manualSpecialHours:'manualHours',carrySpecialHours:'carryHours'})) $(id).value=data.special[key];
+ $("manualSpecialDays").value=fmtDays(Number(data.special.manualHours)||0,Math.max(.1,Number(data.settings.dailyHours)||8));
  previewSpecial();
 }
 
@@ -226,8 +241,14 @@ function refreshSpecial(){const st=specialStats(),sp=data.special;
  $('specialRemain').textContent=st.remaining===null?'—':fmtDays(st.remaining,st.dayHours);
  $('specialHint').textContent=st.hours===null?'請至設定填寫到職日期，才能試算特休。':'以 '+st.dayHours+' 小時換算 1 天；特休使用 '+st.usedHours.toFixed(2)+' 小時。非週年制或排班制請核對公司約定與法定權益。';
 }
-function previewSpecial(){const sp=data.special;const t=$('specialPreview');if(!t)return;t.textContent=sp.mode==='manual'?'手動設定將覆蓋自動試算的年度特休時數；結轉時數另行加計。':'依法試算會參考到職日期、年資與每週工時；每年 7/1 等非週年制、部分工時與排班制仍須依公司採用的制度核對，避免低於法定權益。';}
-function saveSpecial(){const sp={...data.special};for(const [id,key] of Object.entries({hireDate:'hireDate',specialStartMonth:'startMonth',specialStartDay:'startDay',workPattern:'workPattern',weeklyHours:'weeklyHours',weeklyDays:'weeklyDays',specialMode:'mode',manualSpecialHours:'manualHours',carrySpecialHours:'carryHours'}))sp[key]=$(id).value;
+function syncManualSpecial(from){
+ const dayHours=Number($('dailyHours').value)||Number(data.settings.dailyHours)||8;
+ if(!(dayHours>0))return;
+ if(from==='days')$('manualSpecialHours').value=String(Math.round((Number($('manualSpecialDays').value)||0)*dayHours*100)/100);
+ else $('manualSpecialDays').value=String(Math.round((Number($('manualSpecialHours').value)||0)/dayHours*10000)/10000);
+}
+function previewSpecial(){const sp=data.special;const t=$('specialPreview');if(!t)return;t.textContent=sp.mode==='manual'?'手動填寫天數或小時會互相換算（依每日工時），儲存後覆蓋依法試算值；前期結轉另加。':'依法試算會參考到職日期、年資與每週工時；每年 7/1 等非週年制、部分工時與排班制仍須依公司採用的制度核對，避免低於法定權益。';}
+function saveSpecial(){syncManualSpecial('days');const sp={...data.special};for(const [id,key] of Object.entries({hireDate:'hireDate',specialStartMonth:'startMonth',specialStartDay:'startDay',workPattern:'workPattern',weeklyHours:'weeklyHours',weeklyDays:'weeklyDays',specialMode:'mode',manualSpecialHours:'manualHours',carrySpecialHours:'carryHours'}))sp[key]=$(id).value;
  for(const k of ['startMonth','startDay','weeklyHours','weeklyDays','manualHours','carryHours'])sp[k]=Number(sp[k]);
  if(sp.mode==='auto'&&!sp.hireDate){alert('請填寫到職日期');return}
  if(sp.startDay<1||sp.startDay>28||sp.weeklyHours<0||sp.weeklyHours>40||sp.weeklyDays<1||sp.weeklyDays>7||sp.manualHours<0||sp.carryHours<0){alert('請檢查特休設定數值');return}
@@ -312,6 +333,13 @@ document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()
 $("saveLeaveBtn").addEventListener("click",saveLeave);
 $("saveSettingsBtn").addEventListener("click",saveSettings);
 $("saveSpecialBtn").addEventListener("click",saveSpecial);
+$('manualSpecialDays').addEventListener('input',()=>syncManualSpecial('days'));
+$('manualSpecialHours').addEventListener('input',()=>syncManualSpecial('hours'));
+$('dailyHours').addEventListener('change',()=>syncManualSpecial('days'));
+document.querySelectorAll('[data-refresh]').forEach(b=>b.addEventListener('click',()=>{
+ data=safeLoad();fillLeaveTypes();loadSettings();showHolidayStatus();refreshAll();
+ b.textContent='✓ 已更新';setTimeout(()=>b.textContent='↻ 重新整理',1200);
+}));
 $("specialMode").addEventListener("change",()=>{$("specialPreview").textContent=$("specialMode").value==="manual"?"手動模式：輸入年度特休時數；結轉另加。":"自動模式：依年資及工作型態試算，特殊排班須人工核對。"});
 $("holidayBtn").addEventListener("click",updateHoliday);
 $("csvBtn").addEventListener("click",exportCSV);
