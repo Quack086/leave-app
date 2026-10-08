@@ -218,12 +218,10 @@ function specialStats(ref=new Date()){
  let hours=null;
  if(sp.mode==='manual')hours=Math.max(0,Number(sp.manualHours)||0);
  else if(hire){
-   // 週年制權利基準；7/1 等非週年制年度採期間內權利變化推算，需依公司制度核對。
-   const baseline=new Date(period.start);baseline.setDate(baseline.getDate()-1);
-   const before=legalDays(hire,baseline),after=legalDays(hire,period.end);
-   const initial=hire<=period.start?before:0;
-   let earned=Math.max(0,after-initial);
-   if(hire<=period.start && before===after)earned=after;
+    // 特休為各年資門檻的完整給假額度，不能用新舊額度相減。
+    // 例如 2024/7/1 到職，在 2026/7/1 滿兩年應為 10 天，而非 10-7=3 天。
+    // 非週年制的區間以期末已達年資作參考試算，仍需依公司制度核定。
+    const earned=legalDays(hire,period.end);
    const ratio=sp.workPattern==='part'?Math.min(1,Math.max(0,Number(sp.weeklyHours)||0)/40):1;
    const sameDays=sp.workPattern==='part' && Number(sp.weeklyDays)===5;
    hours=earned*(sameDays?Math.max(0,Number(sp.weeklyHours)||0)/Math.max(1,Number(sp.weeklyDays)||1):dayHours*ratio);
@@ -247,7 +245,7 @@ function syncManualSpecial(from){
  if(from==='days')$('manualSpecialHours').value=String(Math.round((Number($('manualSpecialDays').value)||0)*dayHours*100)/100);
  else $('manualSpecialDays').value=String(Math.round((Number($('manualSpecialHours').value)||0)/dayHours*10000)/10000);
 }
-function previewSpecial(){const sp=data.special;const t=$('specialPreview');if(!t)return;t.textContent=sp.mode==='manual'?'手動填寫天數或小時會互相換算（依每日工時），儲存後覆蓋依法試算值；前期結轉另加。':'依法試算會參考到職日期、年資與每週工時；每年 7/1 等非週年制、部分工時與排班制仍須依公司採用的制度核對，避免低於法定權益。';}
+function previewSpecial(){const sp=data.special;const t=$('specialPreview');if(!t)return;t.textContent=sp.mode==='manual'?'手動填寫天數或小時會互相換算（依每日工時），儲存後覆蓋依法試算值；前期結轉另加。':'依法試算依到職年資取得完整法定特休額度，不再扣除前一階段額度；非週年制、部分工時與排班制仍須依公司制度核對。';}
 function saveSpecial(){syncManualSpecial('days');const sp={...data.special};for(const [id,key] of Object.entries({hireDate:'hireDate',specialStartMonth:'startMonth',specialStartDay:'startDay',workPattern:'workPattern',weeklyHours:'weeklyHours',weeklyDays:'weeklyDays',specialMode:'mode',manualSpecialHours:'manualHours',carrySpecialHours:'carryHours'}))sp[key]=$(id).value;
  for(const k of ['startMonth','startDay','weeklyHours','weeklyDays','manualHours','carryHours'])sp[k]=Number(sp[k]);
  if(sp.mode==='auto'&&!sp.hireDate){alert('請填寫到職日期');return}
